@@ -5,6 +5,8 @@
 #include <wchar.h>
 #include <windows.h>
 
+#include "TextHandler/TextHandler.h"
+
 bool KeyEventProc(KEY_EVENT_RECORD);
 
 
@@ -37,21 +39,12 @@ int main()
 
     std::cout << "\x1b[5 q";
 
-    std::string filename = "../inputFile.txt";
-    std::string fileContent;
+    std::string filepath = "C:/Users/Ulrich/source/repos/TextEditor/inputFile.txt";
+    TextHandler textHandler = TextHandler::FromFile(filepath);
+    // textHandler.Display();
 
-    std::ifstream myfile;
-    myfile.open(filename);
-    if (myfile.is_open()) {
-        while (std::getline(myfile, fileContent))
-        {
-            std::cout << fileContent;
-        }
-        myfile.close();
-    }
-    else {
-        std::cerr << "Couldn't open file\n";
-    }
+    textHandler.Add("Test 1 2", 5);
+    textHandler.Display();
 
     std::cout << "\x1b[0;0f";
 
@@ -87,6 +80,7 @@ int main()
             }
         }
     }
+    textHandler.Save();
 
     std::cout << "\x1b[u";
     SetConsoleMode(hIn, dwOriginalInMode);

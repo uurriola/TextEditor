@@ -143,9 +143,11 @@
   <ItemGroup>
     <ClCompile Include="PieceTable\PieceTable.cpp" />
     <ClCompile Include="TextEditor.cpp" />
+    <ClCompile Include="TextHandler\TextHandler.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PieceTable\PieceTable.h" />
+    <ClInclude Include="TextHandler\TextHandler.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
