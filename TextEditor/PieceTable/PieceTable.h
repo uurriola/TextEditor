@@ -30,6 +30,7 @@ public:
 	}
 
 	void AddCharacter(char character, unsigned int position);
+	void DeleteCharacter(unsigned int position);
 
 	std::string GetText();
 private:

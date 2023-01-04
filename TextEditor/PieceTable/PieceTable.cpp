@@ -9,7 +9,6 @@ void PieceTable::AddCharacter(char character, unsigned int position)
 	TableEntry entry(updateBuffer, updateBuffer->length() - 1, 1);
 
 	unsigned int blockEndPosition = 0;
-	bool splitBlock = false;
 	std::list<TableEntry>::iterator blockIt = blocks.begin();
 	while (blockIt != blocks.end())
 	{
@@ -50,6 +49,39 @@ void PieceTable::AddCharacter(char character, unsigned int position)
 	}
 
 	blocks.insert(blockIt, entry);
+}
+
+void PieceTable::DeleteCharacter(unsigned int position)
+{
+	unsigned int blockEndPosition = 0;
+	std::list<TableEntry>::iterator blockIt = blocks.begin();
+	while (blockIt != blocks.end())
+	{
+		if (blockEndPosition + blockIt->size >= position)
+		{
+			TableEntry entryToSplit = *blockIt;
+			// Found what block to split
+			// Part of the block before deleted character
+			unsigned int firstPartSize = position - blockEndPosition;
+			if (firstPartSize > 0)
+			{
+				TableEntry firstPartEntry(entryToSplit.buffer, entryToSplit.startIndex, firstPartSize);
+				blocks.insert(blockIt, firstPartEntry);
+			}
+
+			// Part of the block after deleted character
+			if (entryToSplit.size - firstPartSize - 1 > 0)
+			{
+				TableEntry secondPartEntry(entryToSplit.buffer, entryToSplit.startIndex + firstPartSize + 1, entryToSplit.size - firstPartSize - 1);
+				blocks.insert(blockIt, secondPartEntry);
+			}
+			blocks.erase(blockIt);
+			break;
+		}
+		blockEndPosition += blockIt->size;
+		++blockIt;
+	}
+
 }
 
 std::string PieceTable::GetText()

@@ -96,26 +96,30 @@ bool KeyEventProc(KEY_EVENT_RECORD ker, FileHandler& fileHandler)
             break;
         case VK_UP:
             fileHandler.DecrementY();
-            std::cout << "\x1b[1A";
             break;
         case VK_DOWN:
             fileHandler.IncrementY();
-            std::cout << "\x1b[1B";
             break;
         case VK_LEFT:
             fileHandler.DecrementX();
-            std::cout << "\x1b[1D";
             break;
         case VK_RIGHT:
             fileHandler.IncrementX();
-            std::cout << "\x1b[1C";
+            break;
+        case VK_BACK:
+            // TODO: handle start of line
+            fileHandler.DecrementX();
+        case VK_DELETE:
+            fileHandler.DeleteCharacter();
+            // fileHandler.Display();
             break;
         case VK_RETURN:
-            std::cout << "\x1b[1L";
+            fileHandler.AddCharacter('\n');
+            // fileHandler.Display();
             break;
         default:
-            fileHandler.AddCharacter(ker.uChar.UnicodeChar);
-            std::wcout << "\x1b[" << 1 << "@" << ker.uChar.UnicodeChar;
+            fileHandler.AddCharacter(ker.uChar.AsciiChar);
+            // fileHandler.Display();
             break;
         }
     }
