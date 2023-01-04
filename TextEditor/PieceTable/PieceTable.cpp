@@ -70,7 +70,7 @@ void PieceTable::DeleteCharacter(unsigned int position)
 			}
 
 			// Part of the block after deleted character
-			if (entryToSplit.size - firstPartSize - 1 > 0)
+			if (entryToSplit.startIndex + firstPartSize + 1 < entryToSplit.size && entryToSplit.size - firstPartSize - 1 > 0)
 			{
 				TableEntry secondPartEntry(entryToSplit.buffer, entryToSplit.startIndex + firstPartSize + 1, entryToSplit.size - firstPartSize - 1);
 				blocks.insert(blockIt, secondPartEntry);

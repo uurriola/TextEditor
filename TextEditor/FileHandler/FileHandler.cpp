@@ -34,14 +34,12 @@ void FileHandler::AddCharacter(char character) {
     pieceTable.AddCharacter(character, position + x);
     if (character == '\n')
     {
-        std::cout << "\x1b[1L";
         y++;
         lineLengths.insert(lineLengths.begin() + y, 0);
         x = 0;
     }
     else
     {
-        std::wcout << "\x1b[1@" << character;
         lineLengths[y] ++;
         x++;
     }
@@ -79,8 +77,7 @@ void FileHandler::Display()
 {
     std::cout << "\x1b[0;0H";  // cursor go to first character
     std::cout << pieceTable.GetText();
-    std::cout << "\x1b[0;0H";  // cursor go to first character
-    //std::cout << "\x1b[" << y << ";" << x + 1 << "H";  // cursor go to right character
+    std::cout << "\x1b[" << y << ";" << x + 1 << "H";  // cursor go to right character
 }
 
 void FileHandler::Save()
