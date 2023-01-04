@@ -142,12 +142,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="PieceTable\PieceTable.cpp" />
+    <ClCompile Include="TextBuffer\TextBuffer.cpp" />
     <ClCompile Include="TextEditor.cpp" />
-    <ClCompile Include="TextHandler\TextHandler.cpp" />
+    <ClCompile Include="FileHandler\FileHandler.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PieceTable\PieceTable.h" />
-    <ClInclude Include="TextHandler\TextHandler.h" />
+    <ClInclude Include="TextBuffer\TextBuffer.h" />
+    <ClInclude Include="FileHandler\FileHandler.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

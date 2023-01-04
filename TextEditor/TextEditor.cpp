@@ -1,13 +1,10 @@
-#include <fstream>
 #include <iostream>
-#include <stdio.h>
-#include <string>
 #include <wchar.h>
 #include <windows.h>
 
-#include "TextHandler/TextHandler.h"
+#include "FileHandler/FileHandler.h"
 
-bool KeyEventProc(KEY_EVENT_RECORD);
+bool KeyEventProc(KEY_EVENT_RECORD, FileHandler&);
 
 
 int main()
@@ -37,16 +34,14 @@ int main()
         return -1;
     }
 
-    std::cout << "\x1b[5 q";
 
     std::string filepath = "C:/Users/Ulrich/source/repos/TextEditor/inputFile.txt";
-    TextHandler textHandler = TextHandler::FromFile(filepath);
-    // textHandler.Display();
-
-    textHandler.Add("Test 1 2", 5);
-    textHandler.Display();
-
-    std::cout << "\x1b[0;0f";
+    FileHandler fileHandler = FileHandler::FromFile(filepath);
+    // Switch to alternate console buffer to avoid mixing file and other logs
+    std::cout << "\x1b[?1049h";
+    fileHandler.Display();
+    std::cout << "\x1b[5 q";  // bar cursor
+    std::cout << "\x1b[0;0f";  // cursor go to first character
 
     const int bufferSize = 10;
     INPUT_RECORD irInBuf[bufferSize];
@@ -66,7 +61,7 @@ int main()
                 switch (irInBuf[i].EventType)
                 {
                 case KEY_EVENT: // keyboard input
-                    exit = KeyEventProc(irInBuf[i].Event.KeyEvent);
+                    exit = KeyEventProc(irInBuf[i].Event.KeyEvent, fileHandler);
                     break;
                 case MOUSE_EVENT:
                 case WINDOW_BUFFER_SIZE_EVENT:
@@ -80,14 +75,16 @@ int main()
             }
         }
     }
-    textHandler.Save();
+    // Switch back to main console buffer
+    std::cout << "\x1b[?1049l";
+    fileHandler.Save();
 
-    std::cout << "\x1b[u";
     SetConsoleMode(hIn, dwOriginalInMode);
     return 0;
 }
 
-bool KeyEventProc(KEY_EVENT_RECORD ker)
+
+bool KeyEventProc(KEY_EVENT_RECORD ker, FileHandler& fileHandler)
 {
     bool exit = false;
     if (ker.bKeyDown)
@@ -98,26 +95,29 @@ bool KeyEventProc(KEY_EVENT_RECORD ker)
             exit = true;
             break;
         case VK_UP:
+            fileHandler.DecrementY();
             std::cout << "\x1b[1A";
             break;
         case VK_DOWN:
+            fileHandler.IncrementY();
             std::cout << "\x1b[1B";
             break;
         case VK_LEFT:
+            fileHandler.DecrementX();
             std::cout << "\x1b[1D";
             break;
         case VK_RIGHT:
+            fileHandler.IncrementX();
             std::cout << "\x1b[1C";
             break;
         case VK_RETURN:
             std::cout << "\x1b[1L";
             break;
         default:
-            size_t charCount = wcslen(&ker.uChar.UnicodeChar) - 1;
-            std::wcout << "\x1b[" << charCount << "@" << ker.uChar.UnicodeChar;
+            fileHandler.AddCharacter(ker.uChar.UnicodeChar);
+            std::wcout << "\x1b[" << 1 << "@" << ker.uChar.UnicodeChar;
             break;
         }
     }
     return exit;
-
 }

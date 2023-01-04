@@ -1,14 +1,18 @@
 #pragma once
 
 #include <list>
+#include <memory>
 #include <string>
+
+#include "../TextBuffer/TextBuffer.h"
+
 
 class TableEntry
 {
 public:
-	TableEntry(std::string buf, unsigned int startI, unsigned int si) : buffer(buf), startIndex(startI), size(si) {};
+	TableEntry(std::shared_ptr<TextBuffer> buf, unsigned int startI, unsigned int si) : buffer(buf), startIndex(startI), size(si) {};
 
-	std::string buffer;
+	std::shared_ptr<TextBuffer> buffer;
 	unsigned int startIndex;
 	unsigned int size;
 };
@@ -16,10 +20,21 @@ public:
 class PieceTable
 {
 public:
-	void Add(std::string content);
-	void Add(std::string content, unsigned int position);
+	PieceTable(std::string content)
+	{
+		originBuffer = std::make_shared<TextBuffer>(content);
+		updateBuffer = std::make_shared<TextBuffer>("");
+
+		TableEntry entry(originBuffer, 0, originBuffer->length());
+		blocks.push_back(entry);
+	}
+
+	void AddCharacter(char character, unsigned int position);
+
 	std::string GetText();
 private:
+	std::shared_ptr<TextBuffer> originBuffer;
+	std::shared_ptr<TextBuffer> updateBuffer;
 	std::list<TableEntry> blocks;
 };
 
