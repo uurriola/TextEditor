@@ -41,7 +41,6 @@ int main()
     std::cout << "\x1b[?1049h";
     fileHandler.Display();
     std::cout << "\x1b[5 q";  // bar cursor
-    std::cout << "\x1b[0;0f";  // cursor go to first character
 
     const int bufferSize = 10;
     INPUT_RECORD irInBuf[bufferSize];
@@ -107,19 +106,18 @@ bool KeyEventProc(KEY_EVENT_RECORD ker, FileHandler& fileHandler)
             fileHandler.IncrementX();
             break;
         case VK_BACK:
-            // TODO: handle start of line
             fileHandler.DecrementX();
         case VK_DELETE:
             fileHandler.DeleteCharacter();
-            // fileHandler.Display();
+            fileHandler.Display();
             break;
         case VK_RETURN:
             fileHandler.AddCharacter('\n');
-            // fileHandler.Display();
+            fileHandler.Display();
             break;
         default:
             fileHandler.AddCharacter(ker.uChar.AsciiChar);
-            // fileHandler.Display();
+            fileHandler.Display();
             break;
         }
     }
