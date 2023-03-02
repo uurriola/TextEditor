@@ -59,8 +59,8 @@ void PieceTable::DeleteCharacter(unsigned int position)
 	{
 		if (blockEndPosition + blockIt->size >= position)
 		{
-			TableEntry entryToSplit = *blockIt;
 			// Found what block to split
+			TableEntry entryToSplit = *blockIt;
 			// Part of the block before deleted character
 			unsigned int firstPartSize = position - blockEndPosition;
 			if (firstPartSize > 0)
@@ -84,7 +84,7 @@ void PieceTable::DeleteCharacter(unsigned int position)
 
 }
 
-std::string PieceTable::GetText()
+const std::string PieceTable::GetText() const
 {
 	std::string text = "";
 	for (auto& block : blocks)

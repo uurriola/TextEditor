@@ -10,66 +10,34 @@
 class FileHandler
 {
 public:
-	static FileHandler FromFile(std::string filepath);
-	FileHandler(std::string filepath, std::string content): x(0), y(0), filepath(filepath), pieceTable(content)
+	FileHandler(std::string filepath, const std::string_view content): x(0), y(0), textPosition(0), filepath(filepath)
 	{
-		std::string text = pieceTable.GetText();
 		size_t previous_found{ 0 };
-		size_t found = text.find_first_of('\n');
+		size_t found = content.find_first_of('\n');
 		while (found != std::string::npos)
 		{
 			lineLengths.push_back(found - previous_found);
 			previous_found = found + 1;
-			found = text.find_first_of('\n', found + 1);
+			found = content.find_first_of('\n', found + 1);
 		}
-		lineLengths.push_back(text.length() - previous_found);
+		lineLengths.push_back(content.length() - previous_found);
 	};
 
-	void AddCharacter(char character);
-	void DeleteCharacter();
+	virtual ~FileHandler() {};
 
-	void Display();
-	void Save();
+	virtual void AddCharacter(const char character) = 0;
+	virtual void DeleteCharacter() = 0;
 
-	// TODO: handle line length in the following methods
-	void IncrementX()
-	{
-		if (x < lineLengths[y])
-		{
-			x++;
-			std::cout << "\x1b[1C";
-		}
-	}
-	void DecrementX() {
-		if (x > 0)
-		{
-			x--;
-			std::cout << "\x1b[1D";
-		}
-	}
-	void IncrementY()
-	{
-		if (y < lineLengths.size())
-		{
-			y++;
-			std::cout << "\x1b[1B";
-		}
-	}
-	void DecrementY()
-	{
-		if (y > 0)
-		{
-			y--;
-			std::cout << "\x1b[1A";
-		}
-	}
+	void Display() const;
+	virtual const std::string GetText() const = 0;
+	void Save() const;
 
-	const unsigned int X() { return x; }
-	const unsigned int Y() { return y; }
-private:
-	unsigned int x, y;
+	void SetPosition(const unsigned int nx, const unsigned int ny);
+protected:
+	unsigned int x, y, textPosition;
 	std::vector<unsigned int> lineLengths;
+
+private:
 	std::string filepath;
-	PieceTable pieceTable;
 };
 

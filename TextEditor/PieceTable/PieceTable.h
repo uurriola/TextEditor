@@ -32,7 +32,7 @@ public:
 	void AddCharacter(char character, unsigned int position);
 	void DeleteCharacter(unsigned int position);
 
-	std::string GetText();
+	const std::string GetText() const;
 private:
 	std::shared_ptr<TextBuffer> originBuffer;
 	std::shared_ptr<TextBuffer> updateBuffer;

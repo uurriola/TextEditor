@@ -141,12 +141,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="FileHandler\ArrayHandler.cpp" />
+    <ClCompile Include="FileHandler\PieceTableHandler.cpp" />
     <ClCompile Include="PieceTable\PieceTable.cpp" />
     <ClCompile Include="TextBuffer\TextBuffer.cpp" />
     <ClCompile Include="TextEditor.cpp" />
     <ClCompile Include="FileHandler\FileHandler.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="FileHandler\ArrayHandler.h" />
+    <ClInclude Include="FileHandler\PieceTableHandler.h" />
     <ClInclude Include="PieceTable\PieceTable.h" />
     <ClInclude Include="TextBuffer\TextBuffer.h" />
     <ClInclude Include="FileHandler\FileHandler.h" />
