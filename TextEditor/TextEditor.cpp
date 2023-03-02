@@ -1,125 +1,73 @@
+#include <chrono>
 #include <iostream>
-#include <wchar.h>
-#include <windows.h>
+#include <map>
 
-#include "FileHandler/FileHandler.h"
-
-bool KeyEventProc(KEY_EVENT_RECORD, FileHandler&);
+#include "FileHandler/ArrayHandler.h"
+#include "FileHandler/PieceTableHandler.h"
 
 
 int main()
 {
-    // Set output mode to handle virtual terminal sequences
-    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-    if (hOut == INVALID_HANDLE_VALUE)
-    {
-        return false;
-    }
-    HANDLE hIn = GetStdHandle(STD_INPUT_HANDLE);
-    if (hIn == INVALID_HANDLE_VALUE)
-    {
-        return -1;
-    }
-
-    DWORD dwOriginalInMode = 0;
-    if (!GetConsoleMode(hIn, &dwOriginalInMode))
-    {
-        return -1;
-    }
-
-    DWORD dwInMode = ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT;
-    if (!SetConsoleMode(hIn, dwInMode))
-    {
-        // Failed to set VT input mode, can't do anything here.
-        return -1;
-    }
-
-
+    auto startLoadTime = std::chrono::high_resolution_clock::now();
     std::string filepath = "C:/Users/Ulrich/source/repos/TextEditor/inputFile.txt";
-    FileHandler fileHandler = FileHandler::FromFile(filepath);
-    // Switch to alternate console buffer to avoid mixing file and other logs
-    std::cout << "\x1b[?1049h";
-    fileHandler.Display();
-    std::cout << "\x1b[5 q";  // bar cursor
 
-    const int bufferSize = 10;
-    INPUT_RECORD irInBuf[bufferSize];
-    DWORD cNumRead;
-
-    bool exit = false;
-    while (!exit)
-    {
-        if (!ReadConsoleInput(hIn, irInBuf, bufferSize, &cNumRead))
+    std::string text;
+    std::ifstream file;
+    file.open(filepath);
+    if (file.is_open()) {
+        while (std::getline(file, text, '\0'))
         {
-            std::cout << "ReadConsoleInput";
+            continue;
         }
-        else
-        {
-            for (unsigned int i = 0; i < cNumRead; i++)
-            {
-                switch (irInBuf[i].EventType)
-                {
-                case KEY_EVENT: // keyboard input
-                    exit = KeyEventProc(irInBuf[i].Event.KeyEvent, fileHandler);
-                    break;
-                case MOUSE_EVENT:
-                case WINDOW_BUFFER_SIZE_EVENT:
-                case FOCUS_EVENT:
-                case MENU_EVENT:
-                    break;
-                default:
-                    std::cout << "Unknown event type";
-                    break;
-                }
-            }
-        }
+        file.close();
     }
-    // Switch back to main console buffer
-    std::cout << "\x1b[?1049l";
-    fileHandler.Save();
+    else {
+        std::cerr << "Couldn't open file\n";
+    }
+    auto endLoadTime = std::chrono::high_resolution_clock::now();
+    auto loadFileDuration = duration_cast<std::chrono::microseconds>(endLoadTime - startLoadTime);
+    std::cout << "File loaded in " << loadFileDuration.count() / 1000.0 << "ms" << std::endl;
 
-    SetConsoleMode(hIn, dwOriginalInMode);
+    std::map<std::string, FileHandler*> fileHandlers = {
+        {"piece table", new PieceTableHandler(filepath, text)},
+        {"raw string", new ArrayHandler(filepath, text)},
+    };
+
+    unsigned int updateCount = 1000;
+    std::list<std::pair<std::pair<int, int>, char>> randomUpdates;
+
+    // Generate random updates to apply (only insertion for now)
+    for (unsigned int i = 0; i < updateCount; i++)
+    {
+        char cch = 'a' + rand() % 26;
+        unsigned int y = rand() % 100;
+        unsigned int x = rand() % 100;
+        randomUpdates.push_back({ {x, y}, cch });
+    }
+
+    for (auto [handlerName, fileHandler] : fileHandlers)
+    {
+        std::cout << handlerName << std::endl;
+        // fileHandler.Display();
+
+        auto startUpdatesTime = std::chrono::high_resolution_clock::now();
+        for (auto [position, characterToInsert] : randomUpdates)
+        {
+            fileHandler->SetPosition(position.first, position.second);
+            fileHandler->AddCharacter(characterToInsert);
+        }
+
+        auto endUpdatesTime = std::chrono::high_resolution_clock::now();
+        auto updateFileDuration = duration_cast<std::chrono::microseconds>(endUpdatesTime - startUpdatesTime);
+        std::cout << "Inserted " << randomUpdates.size() << " characters in " << updateFileDuration.count() / 1000.0 << "ms." << std::endl;
+
+        auto startSaveTime = std::chrono::high_resolution_clock::now();
+        fileHandler->Save();
+        auto endSaveTime = std::chrono::high_resolution_clock::now();
+        auto saveFileDuration = duration_cast<std::chrono::microseconds>(endSaveTime - startSaveTime);
+        std::cout << "File saved in " << saveFileDuration.count() / 1000.0 << "ms." << std::endl;
+        std::cout << std::endl;
+    }
+
     return 0;
-}
-
-
-bool KeyEventProc(KEY_EVENT_RECORD ker, FileHandler& fileHandler)
-{
-    bool exit = false;
-    if (ker.bKeyDown)
-    {
-        switch (ker.wVirtualKeyCode)
-        {
-        case VK_ESCAPE:
-            exit = true;
-            break;
-        case VK_UP:
-            fileHandler.DecrementY();
-            break;
-        case VK_DOWN:
-            fileHandler.IncrementY();
-            break;
-        case VK_LEFT:
-            fileHandler.DecrementX();
-            break;
-        case VK_RIGHT:
-            fileHandler.IncrementX();
-            break;
-        case VK_BACK:
-            fileHandler.DecrementX();
-        case VK_DELETE:
-            fileHandler.DeleteCharacter();
-            fileHandler.Display();
-            break;
-        case VK_RETURN:
-            fileHandler.AddCharacter('\n');
-            fileHandler.Display();
-            break;
-        default:
-            fileHandler.AddCharacter(ker.uChar.AsciiChar);
-            fileHandler.Display();
-            break;
-        }
-    }
-    return exit;
 }
